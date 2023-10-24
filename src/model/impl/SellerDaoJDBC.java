@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,9 +31,54 @@ public class SellerDaoJDBC implements SellerDao {
 		this.conn = conn;
 	}
 
+	
 	@Override
 	public void insert(Seller dep) {
-		// TODO Auto-generated method stub
+
+	
+		PreparedStatement st = null;
+		
+		try {
+			
+			String query = "INSERT INTO seller "
+					+ "(Name, Email, BirthDate, BaseSalary, DepartmentId) "
+					+ "VALUES "
+					+ "(?, ?, ?, ?, ?)";
+			
+			
+			st = conn.prepareStatement(query,Statement.RETURN_GENERATED_KEYS); //? place holder
+			
+			st.setString(1, dep.getName());
+			st.setString(2, dep.getEmail());
+			st.setDate(3, new java.sql.Date(dep.getBirthDate().getTime())); // instanxiar data sql
+			st.setDouble(4, dep.getBaseSalary());
+			st.setInt(5, dep.getDep().getId());
+		
+
+			
+			int rowsAffected = st.executeUpdate();
+
+			if (rowsAffected>0) {
+			ResultSet rs = st.getGeneratedKeys(); 
+			if (rs.next()) {
+				int id = rs.getInt(1); //valor primeira coluna (id)
+				dep.setId(id); // meter id do novo add
+			}
+			DB.closeResultSet(rs);
+		}
+		else {
+			throw new DbException("unexpected error! No rows affected!");
+		}
+			
+		}
+		catch (SQLException e) {
+			throw new DbException(e.getMessage());
+			
+		}
+		finally {
+		
+			DB.closeStatement(st);
+		}
 
 	}
 

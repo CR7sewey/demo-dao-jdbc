@@ -50,6 +50,11 @@ public class Program {
 		
 		sellers2.forEach(System.out::println);
 		
+		System.out.println("\n === TEST 4: seller insert ===");
+		Seller newSeller = new Seller(null,"Greg","grwg@gmail.com",new Date(),4000.0,new Department(2,null));
+		sellerDao.insert(newSeller);
+		
+		System.out.println("Inserted New id = " + newSeller.getId());		
 		
 		
 
