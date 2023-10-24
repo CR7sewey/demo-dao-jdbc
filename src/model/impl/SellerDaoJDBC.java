@@ -31,52 +31,42 @@ public class SellerDaoJDBC implements SellerDao {
 		this.conn = conn;
 	}
 
-	
 	@Override
 	public void insert(Seller dep) {
 
-	
 		PreparedStatement st = null;
-		
+
 		try {
-			
-			String query = "INSERT INTO seller "
-					+ "(Name, Email, BirthDate, BaseSalary, DepartmentId) "
-					+ "VALUES "
+
+			String query = "INSERT INTO seller " + "(Name, Email, BirthDate, BaseSalary, DepartmentId) " + "VALUES "
 					+ "(?, ?, ?, ?, ?)";
-			
-			
-			st = conn.prepareStatement(query,Statement.RETURN_GENERATED_KEYS); //? place holder
-			
+
+			st = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS); // ? place holder
+
 			st.setString(1, dep.getName());
 			st.setString(2, dep.getEmail());
 			st.setDate(3, new java.sql.Date(dep.getBirthDate().getTime())); // instanxiar data sql
 			st.setDouble(4, dep.getBaseSalary());
 			st.setInt(5, dep.getDep().getId());
-		
 
-			
 			int rowsAffected = st.executeUpdate();
 
-			if (rowsAffected>0) {
-			ResultSet rs = st.getGeneratedKeys(); 
-			if (rs.next()) {
-				int id = rs.getInt(1); //valor primeira coluna (id)
-				dep.setId(id); // meter id do novo add
+			if (rowsAffected > 0) {
+				ResultSet rs = st.getGeneratedKeys();
+				if (rs.next()) {
+					int id = rs.getInt(1); // valor primeira coluna (id)
+					dep.setId(id); // meter id do novo add
+				}
+				DB.closeResultSet(rs);
+			} else {
+				throw new DbException("unexpected error! No rows affected!");
 			}
-			DB.closeResultSet(rs);
-		}
-		else {
-			throw new DbException("unexpected error! No rows affected!");
-		}
-			
-		}
-		catch (SQLException e) {
+
+		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
-			
-		}
-		finally {
-		
+
+		} finally {
+
 			DB.closeStatement(st);
 		}
 
@@ -84,9 +74,43 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public void update(Seller dep) {
-		// TODO Auto-generated method stub
+		
+		
+		PreparedStatement st = null;
+
+		try {
+
+			String query = "UPDATE seller "
+					+ "SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? "
+					+ "WHERE Id = ?";
+
+			st = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS); // ? place holder
+
+			st.setString(1, dep.getName());
+			st.setString(2, dep.getEmail());
+			st.setDate(3, new java.sql.Date(dep.getBirthDate().getTime())); // instanxiar data sql
+			st.setDouble(4, dep.getBaseSalary());
+			st.setInt(5, dep.getDep().getId());
+			st.setInt(6, dep.getId());
+
+			st.executeUpdate();
+
+			
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+
+		} finally {
+
+			DB.closeStatement(st);
+		}
 
 	}
+
+
+		
+
+	
 
 	@Override
 	public void deleteById(Integer id) {
@@ -167,7 +191,7 @@ public class SellerDaoJDBC implements SellerDao {
 				Seller s = instantiateSeller(rs, dep);
 				sellers.add(s);
 			}
-			
+
 			return sellers;
 
 		} catch (SQLException e) {
