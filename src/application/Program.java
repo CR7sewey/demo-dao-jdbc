@@ -45,6 +45,11 @@ public class Program {
 		sellers.forEach(System.out::println);
 		
 		
+		System.out.println("\n === TEST 3: seller findAll ===");
+		List<Seller> sellers2 = sellerDao.findAll();
+		
+		sellers2.forEach(System.out::println);
+		
 		
 		
 

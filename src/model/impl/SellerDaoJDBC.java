@@ -61,18 +61,19 @@ public class SellerDaoJDBC implements SellerDao {
 			st.setInt(1, id);
 			rs = st.executeQuery();
 			if (rs.next()) { // pq primeira linha ~´e a do id e assim
-				//Department dep = new Department();
-				//dep.setId(rs.getInt("DepartmentId"));
-				//dep.setName(rs.getString("DepName"));
+				// Department dep = new Department();
+				// dep.setId(rs.getInt("DepartmentId"));
+				// dep.setName(rs.getString("DepName"));
 				// podia fazer como para o dep
 				/*
 				 * Seller obj = new Seller(); obj.setId(rs.getInt("Id");
 				 */
-				
+
 				Department dep = instantiateDepartment(rs);
 				Seller sel = instantiateSeller(rs, dep);
-				//return new Seller(rs.getInt("Id"), rs.getString("Name"), rs.getString("Email"), rs.getDate("BirthDate"),
-				//		rs.getDouble("BaseSalary"), dep);
+				// return new Seller(rs.getInt("Id"), rs.getString("Name"),
+				// rs.getString("Email"), rs.getDate("BirthDate"),
+				// rs.getDouble("BaseSalary"), dep);
 				return sel;
 			}
 
@@ -90,10 +91,47 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public List<Seller> findAll() {
+		// TODO Auto-generated method stub
 
-		return null;
+		PreparedStatement st = null;
+		ResultSet rs = null; // objeto contendo os resultados da nossa consulta numa tablea!!
+
+		try {
+
+			String query = "SELECT seller.*,department.Name as DepName FROM seller"
+					+ " INNER JOIN department ON seller.DepartmentId = department.Id " + "ORDER BY Name";
+			st = conn.prepareStatement(query);
+			rs = st.executeQuery();
+			List<Seller> sellers = new ArrayList<>();
+
+			Map<Integer, Department> map = new HashMap<>(); // guardar qq departamento isntanciado, nao permite
+															// repeticoes
+
+			while (rs.next()) {
+
+				Department dep = map.get(rs.getInt("DepartmentId")); // testar se ja existe o departamento!! se nao
+																		// existir, retorna nulo
+				if (dep == null) {
+					dep = instantiateDepartment(rs);
+					map.put(rs.getInt("DepartmentId"), dep); // para evitar que fique o modo incorreto ver PDF
+				}
+
+				Seller s = instantiateSeller(rs, dep);
+				sellers.add(s);
+			}
+			
+			return sellers;
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeResultSet(rs);
+			DB.closeStatement(st);
+
+		}
+
 	}
-	
+
 	@Override
 	public List<Seller> findByDepartment(Department department) {
 		PreparedStatement st = null;
@@ -102,26 +140,25 @@ public class SellerDaoJDBC implements SellerDao {
 		try {
 			List<Seller> seller = new ArrayList<>();
 
-			String query = "SELECT seller.*,department.Name as DepName "
-					+ "FROM seller INNER JOIN department "
-					+ "ON seller.DepartmentId = department.Id "
-					+ "WHERE DepartmentId = ? "
-					+ "ORDER BY Name ";
+			String query = "SELECT seller.*,department.Name as DepName " + "FROM seller INNER JOIN department "
+					+ "ON seller.DepartmentId = department.Id " + "WHERE DepartmentId = ? " + "ORDER BY Name ";
 			st = conn.prepareStatement(query);
 			st.setInt(1, department.getId());
 			rs = st.executeQuery();
-			
-			Map<Integer,Department> map = new HashMap<>(); // guardar qq departamento isntanciado, nao permite repeticoes
-			
-			while (rs.next()) { 
-				
-				Department dep = map.get(rs.getInt("DepartmentId")); // testar se ja existe o departamento!! se nao existir, retorna nulo
+
+			Map<Integer, Department> map = new HashMap<>(); // guardar qq departamento isntanciado, nao permite
+															// repeticoes
+
+			while (rs.next()) {
+
+				Department dep = map.get(rs.getInt("DepartmentId")); // testar se ja existe o departamento!! se nao
+																		// existir, retorna nulo
 				if (dep == null) {
 					dep = instantiateDepartment(rs);
 					map.put(rs.getInt("DepartmentId"), dep); // para evitar que fique o modo incorreto ver PDF
 				}
-				
-				Seller s = instantiateSeller(rs,dep);			
+
+				Seller s = instantiateSeller(rs, dep);
 				seller.add(s);
 			}
 
@@ -137,11 +174,13 @@ public class SellerDaoJDBC implements SellerDao {
 
 	}
 
-
 	// private methods _ aka Auxuliaderes
 	// PARA findById
 
-	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {  // nao trato a excecao, so propago pq ela ja é apanhada onde o metodo é aplicado
+	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException { // nao trato a excecao, so
+																							// propago pq ela ja é
+																							// apanhada onde o metodo é
+																							// aplicado
 		Seller obj = new Seller();
 		obj.setId(rs.getInt("Id"));
 		obj.setName(rs.getString("Name"));
@@ -152,12 +191,13 @@ public class SellerDaoJDBC implements SellerDao {
 		return obj;
 	}
 
-	private Department instantiateDepartment(ResultSet rs) throws SQLException { // nao trato a excecao, so propago pq ela ja é apanhada onde o metodo é aplicado
+	private Department instantiateDepartment(ResultSet rs) throws SQLException { // nao trato a excecao, so propago pq
+																					// ela ja é apanhada onde o metodo é
+																					// aplicado
 		Department dep = new Department();
 		dep.setId(rs.getInt("DepartmentId"));
 		dep.setName(rs.getString("DepName"));
 		return dep;
 	}
-
 
 }
