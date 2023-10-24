@@ -34,6 +34,7 @@ public class Program {
 		
 		
 		SellerDao sellerDao = DaoFactory.createSellerDao(); // assim programa nao conece a implementacao, so a interface!, injecao de dependencia sem explicitar implementacao 
+		System.out.println(" === TEST 1: seller findById ===");
 		Seller seller = sellerDao.findById(3);
 		
 		
