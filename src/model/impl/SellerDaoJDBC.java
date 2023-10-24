@@ -4,8 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import db.DB;
 import db.DbException;
@@ -90,6 +93,50 @@ public class SellerDaoJDBC implements SellerDao {
 
 		return null;
 	}
+	
+	@Override
+	public List<Seller> findByDepartment(Department department) {
+		PreparedStatement st = null;
+		ResultSet rs = null; // objeto contendo os resultados da nossa consulta numa tablea!!
+
+		try {
+			List<Seller> seller = new ArrayList<>();
+
+			String query = "SELECT seller.*,department.Name as DepName "
+					+ "FROM seller INNER JOIN department "
+					+ "ON seller.DepartmentId = department.Id "
+					+ "WHERE DepartmentId = ? "
+					+ "ORDER BY Name ";
+			st = conn.prepareStatement(query);
+			st.setInt(1, department.getId());
+			rs = st.executeQuery();
+			
+			Map<Integer,Department> map = new HashMap<>(); // guardar qq departamento isntanciado, nao permite repeticoes
+			
+			while (rs.next()) { 
+				
+				Department dep = map.get(rs.getInt("DepartmentId")); // testar se ja existe o departamento!! se nao existir, retorna nulo
+				if (dep == null) {
+					dep = instantiateDepartment(rs);
+					map.put(rs.getInt("DepartmentId"), dep); // para evitar que fique o modo incorreto ver PDF
+				}
+				
+				Seller s = instantiateSeller(rs,dep);			
+				seller.add(s);
+			}
+
+			return seller;
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeResultSet(rs);
+			DB.closeStatement(st);
+
+		}
+
+	}
+
 
 	// private methods _ aka Auxuliaderes
 	// PARA findById
@@ -111,4 +158,6 @@ public class SellerDaoJDBC implements SellerDao {
 		dep.setName(rs.getString("DepName"));
 		return dep;
 	}
+
+
 }
