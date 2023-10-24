@@ -74,15 +74,13 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public void update(Seller dep) {
-		
-		
+
 		PreparedStatement st = null;
 
 		try {
 
 			String query = "UPDATE seller "
-					+ "SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? "
-					+ "WHERE Id = ?";
+					+ "SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? " + "WHERE Id = ?";
 
 			st = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS); // ? place holder
 
@@ -95,8 +93,6 @@ public class SellerDaoJDBC implements SellerDao {
 
 			st.executeUpdate();
 
-			
-
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 
@@ -107,14 +103,25 @@ public class SellerDaoJDBC implements SellerDao {
 
 	}
 
-
-		
-
-	
-
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
+
+		PreparedStatement st = null;
+
+		try {
+
+			String query = "DELETE FROM seller " + "WHERE Id = ?";
+
+			st = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS); // ? place holder
+			st.setInt(1, id);
+			st.executeUpdate();
+
+		} catch (SQLException e) {
+			throw new DbIntegrityException(e.getMessage());
+		} finally {
+
+			DB.closeStatement(st);
+		}
 
 	}
 

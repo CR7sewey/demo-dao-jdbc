@@ -2,6 +2,7 @@ package application;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 import entities.Department;
 import entities.Seller;
@@ -33,6 +34,7 @@ public class Program {
 		 * 
 		 */
 		
+		Scanner sc = new Scanner(System.in);
 		
 		SellerDao sellerDao = DaoFactory.createSellerDao(); // assim programa nao conece a implementacao, so a interface!, injecao de dependencia sem explicitar implementacao 
 		System.out.println(" === TEST 1: seller findById ===");
@@ -63,6 +65,13 @@ public class Program {
 		sellerDao.update(seller);
 		System.out.println("Update Completed");
 		
+		System.out.println("\n === TEST 6: seller delete ===");
+		System.out.println("Digite que bacano quer eliminar: ");
+		int id = sc.nextInt();
+		sellerDao.deleteById(id);
+		System.out.println("Delete Completed!");
+		
+		sc.close();
 
 	}
 
