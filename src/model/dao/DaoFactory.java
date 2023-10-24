@@ -10,5 +10,9 @@ public class DaoFactory {
 	public static SellerDao createSellerDao() { // expoem um metodo que retorna a interface
 		return new SellerDaoJDBC(DB.getConnection()); // instancia implementacao
 	}
+	
+	public static DepartmentDao createDepartmentDao() {
+		return new DepartmentDaoJDBC(DB.getConnection());
+	}
 
 }
